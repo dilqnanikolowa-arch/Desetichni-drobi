@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Математическа игра - Десетични дроби</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e5e7eb;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            transition: width 0.5s ease;
+        }
+
+        .header {
+            padding: 32px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .question-number {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .score-badge {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .score-badge span {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .points-info {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .question-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 32px;
+            line-height: 1.4;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 20px;
+            text-align: left;
+            font-size: 20px;
+            font-weight: 600;
+            border: 2px solid #d1d5db;
+            border-radius: 16px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #8b5cf6;
+            background: #f3e8ff;
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+
+        .option-letter {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 16px;
+        }
+
+        .option-btn.correct {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+            animation: correct 0.5s ease;
+        }
+
+        .option-btn.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+            animation: shake 0.5s ease;
+        }
+
+        .option-btn.disabled {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .open-answer-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .answer-input {
+            flex: 1;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: 600;
+            border: 2px solid #d1d5db;
+            border-radius: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .answer-input:focus {
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .answer-input:disabled {
+            background: #f3f4f6;
+            cursor: not-allowed;
+        }
+
+        .unit-label {
+            font-size: 24px;
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 20px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #10b981, #14b8a6);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: scale(1);
+        }
+
+        .feedback {
+            margin-top: 32px;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .feedback-box {
+            padding: 24px;
+            border-radius: 16px;
+            border: 2px solid;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .feedback-box.correct {
+            background: #d1fae5;
+            border-color: #10b981;
+        }
+
+        .feedback-box.incorrect {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .feedback-icon {
+            font-size: 48px;
+        }
+
+        .feedback-text h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .feedback-box.correct h3 {
+            color: #065f46;
+        }
+
+        .feedback-box.incorrect h3 {
+            color: #991b1b;
+        }
+
+        .feedback-box.correct p {
+            color: #047857;
+        }
+
+        .feedback-box.incorrect p {
+            color: #b91c1c;
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .result-screen {
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .result-emoji {
+            font-size: 96px;
+            margin-bottom: 24px;
+        }
+
+        .result-title {
+            font-size: 48px;
+            font-weight: bold;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .result-score {
+            font-size: 72px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 32px 0;
+        }
+
+        .result-percentage {
+            font-size: 36px;
+            color: #4b5563;
+            margin-bottom: 32px;
+        }
+
+        .restart-btn {
+            padding: 16px 48px;
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        @keyframes correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="gameContainer">
+        <!-- Game screen -->
+        <div id="gameScreen">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="header">
+                <div class="header-top">
+                    <div class="question-number" id="questionNumber"></div>
+                    <div class="score-badge">
+                        <span>⭐</span>
+                        <span id="scoreDisplay">0</span>
+                    </div>
+                </div>
+                <div class="points-info" id="pointsInfo"></div>
+            </div>
+
+            <div class="content">
+                <h2 class="question-text" id="questionText"></h2>
+                
+                <div id="optionsContainer" class="options"></div>
+                
+                <div id="openAnswerContainer" class="open-answer-container hidden">
+                    <div class="input-group">
+                        <input 
+                            type="text" 
+                            id="openAnswerInput" 
+                            class="answer-input" 
+                            placeholder="Въведи отговор (напр. 12,5)"
+                        />
+                        <span class="unit-label" id="unitLabel"></span>
+                    </div>
+                    <button id="submitOpenBtn" class="submit-btn">Провери отговора</button>
+                </div>
+
+                <div id="feedbackContainer" class="feedback hidden"></div>
+            </div>
+        </div>
+
+        <!-- Result screen -->
+        <div id="resultScreen" class="hidden">
+            <div class="result-screen">
+                <div class="result-emoji" id="resultEmoji"></div>
+                <h2 class="result-title" id="resultMessage"></h2>
+                <div class="result-score" id="finalScore"></div>
+                <div class="result-percentage" id="finalPercentage"></div>
+                <button class="restart-btn" onclick="restartGame()">Нова игра</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                question: "Приблизителната стойност на числото 3,842 с точност до 0,01 е:",
+                options: ["3,8", "3,9", "3,84", "3,85"],
+                correct: 2,
+                points: 2,
+                type: "multiple"
+            },
+            {
+                id: 2,
+                question: "Стойността на израза 5,47 + 6,28 е:",
+                options: ["11,65", "12,75", "11,75", "11,85"],
+                correct: 2,
+                points: 2,
+                type: "multiple"
+            },
+            {
+                id: 3,
+                question: "Стойността на израза 14,92 – 2,74 е:",
+                options: ["11,18", "12,18", "12,28", "12,08"],
+                correct: 1,
+                points: 2,
+                type: "multiple"
+            },
+            {
+                id: 4,
+                question: "237,5 dm се изразяват в метри така:",
+                options: ["2,375 m", "237,5 m", "23,75 m", "2375 m"],
+                correct: 2,
+                points: 2,
+                type: "multiple"
+            },
+            {
+                id: 5,
+                question: "Стойността на израза 3,8 × 0,57 е:",
+                options: ["21,66", "2,066", "20,66", "2,166"],
+                correct: 3,
+                points: 3,
+                type: "multiple"
+            },
+            {
+                id: 6,
+                question: "Стойността на израза 18,407 × 0,01 е:",
+                options: ["1840,7", "184,07", "1,8407", "0,18407"],
+                correct: 3,
+                points: 2,
+                type: "multiple"
+            },
+            {
+                id: 7,
+                question: "Стойността на израза 84,375 : 25 е:",
+                options: ["33,75", "33,375", "3,475", "3,375"],
+                correct: 3,
+                points: 3,
+                type: "multiple"
+            },
+            {
+                id: 8,
+                question: "Стойността на частното 3,276 : 2,8 е:",
+                options: ["1,07", "1,2", "1,17", "1,16"],
+                correct: 2,
+                points: 3,
+                type: "multiple"
+            },
+            {
+                id: 9,
+                question: "Ако (5,82 – 2,47) + х = 9,15, то неизвестното число х е:",
+                options: ["5,7", "6,8", "5,8", "4,8"],
+                correct: 2,
+                points: 3,
+                type: "multiple"
+            },
+            {
+                id: 10,
+                question: "Ако (0,72 + 5,28) × х = 13,20, то неизвестното число х е:",
+                options: ["3,2", "79,2", "2,2", "2,3"],
+                correct: 2,
+                points: 3,
+                type: "multiple"
+            },
+            {
+                id: 11,
+                question: "Дължината на правоъгълник е 15,45 cm, а широчината му е 3 пъти по-малка. Обиколката на правоъгълника е:",
+                correctAnswer: "41,2",
+                points: 4,
+                type: "open",
+                unit: "cm"
+            },
+            {
+                id: 12,
+                question: "Мария купила 4 тетрадки по 2,75 лв. всяка и четири химикалки по 1,45 лв. всяка. Покупката на Мария струва:",
+                correctAnswer: "16,80",
+                points: 3,
+                type: "open",
+                unit: "лв."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let selectedAnswer = null;
+        let showFeedback = false;
+
+        const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
+
+        function init() {
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            
+            document.getElementById('questionNumber').textContent = `Задача ${currentQuestion + 1} от ${questions.length}`;
+            document.getElementById('scoreDisplay').textContent = score;
+            document.getElementById('pointsInfo').textContent = `Точки за тази задача: ${question.points}`;
+            document.getElementById('questionText').textContent = question.question;
+
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            if (question.type === 'multiple') {
+                document.getElementById('optionsContainer').classList.remove('hidden');
+                document.getElementById('openAnswerContainer').classList.add('hidden');
+                displayMultipleChoice(question);
+            } else {
+                document.getElementById('optionsContainer').classList.add('hidden');
+                document.getElementById('openAnswerContainer').classList.remove('hidden');
+                displayOpenAnswer(question);
+            }
+
+            document.getElementById('feedbackContainer').classList.add('hidden');
+            showFeedback = false;
+            selectedAnswer = null;
+        }
+
+        function displayMultipleChoice(question) {
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            question.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerHTML = `
+                    <span class="option-letter">${String.fromCharCode(65 + index)}</span>
+                    ${option}
+                `;
+                btn.onclick = () => handleMultipleChoiceAnswer(index);
+                container.appendChild(btn);
+            });
+        }
+
+        function displayOpenAnswer(question) {
+            const input = document.getElementById('openAnswerInput');
+            const unitLabel = document.getElementById('unitLabel');
+            const submitBtn = document.getElementById('submitOpenBtn');
+
+            input.value = '';
+            input.disabled = false;
+            unitLabel.textContent = question.unit;
+            submitBtn.disabled = false;
+
+            submitBtn.onclick = handleOpenAnswer;
+            input.onkeypress = (e) => {
+                if (e.key === 'Enter') {
+                    handleOpenAnswer();
+                }
+            };
+        }
+
+        function handleMultipleChoiceAnswer(index) {
+            if (showFeedback) return;
+
+            const question = questions[currentQuestion];
+            const buttons = document.querySelectorAll('.option-btn');
+
+            selectedAnswer = index;
+            showFeedback = true;
+
+            buttons.forEach((btn, i) => {
+                btn.disabled = true;
+                if (i === question.correct) {
+                    btn.classList.add('correct');
+                } else if (i === index) {
+                    btn.classList.add('incorrect');
+                } else {
+                    btn.classList.add('disabled');
+                }
+            });
+
+            if (index === question.correct) {
+                score += question.points;
+                document.getElementById('scoreDisplay').textContent = score;
+                showFeedbackMessage(true);
+            } else {
+                showFeedbackMessage(false, question.options[question.correct]);
+            }
+        }
+
+        function handleOpenAnswer() {
+            if (showFeedback) return;
+
+            const input = document.getElementById('openAnswerInput');
+            const answer = input.value.trim();
+
+            if (!answer) return;
+
+            const question = questions[currentQuestion];
+            const normalizedUserAnswer = answer.replace(',', '.').replace(/\s/g, '');
+            const normalizedCorrectAnswer = question.correctAnswer.replace(',', '.').replace(/\s/g, '');
+
+            showFeedback = true;
+            input.disabled = true;
+            document.getElementById('submitOpenBtn').disabled = true;
+
+            if (normalizedUserAnswer === normalizedCorrectAnswer) {
+                selectedAnswer = true;
+                score += question.points;
+                document.getElementById('scoreDisplay').textContent = score;
+                showFeedbackMessage(true);
+            } else {
+                selectedAnswer = false;
+                showFeedbackMessage(false, `${question.correctAnswer} ${question.unit}`);
+            }
+        }
+
+        function showFeedbackMessage(isCorrect, correctAnswer = null) {
+            const question = questions[currentQuestion];
+            const container = document.getElementById('feedbackContainer');
+            container.classList.remove('hidden');
+
+            let feedbackHTML = '';
+
+            if (isCorrect) {
+                feedbackHTML = `
+                    <div class="feedback-box correct">
+                        <div class="feedback-icon">✅</div>
+                        <div class="feedback-text">
+                            <h3>Браво! Верен отговор!</h3>
+                            <p>+${question.points} точки</p>
+                        </div>
+                    </div>
+                `;
+            } else {
+                feedbackHTML = `
+                    <div class="feedback-box incorrect">
+                        <div class="feedback-icon">❌</div>
+                        <div class="feedback-text">
+                            <h3>Грешен отговор!</h3>
+                            <p>Правилният отговор е: ${correctAnswer}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const nextBtnText = currentQuestion < questions.length - 1 ? 'Следваща задача →' : 'Виж резултата →';
+            feedbackHTML += `<button class="next-btn" onclick="nextQuestion()">${nextBtnText}</button>`;
+
+            container.innerHTML = feedbackHTML;
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('resultScreen').classList.remove('hidden');
+
+            const percentage = Math.round((score / totalPoints) * 100);
+            let message = "";
+            let emoji = "";
+
+            if (percentage >= 90) {
+                message = "Отличен резултат!";
+                emoji = "🌟";
+            } else if (percentage >= 75) {
+                message = "Много добре!";
+                emoji = "✨";
+            } else if (percentage >= 50) {
+                message = "Добре! Продължавай да се упражняваш!";
+                emoji = "👍";
+            } else {
+                message = "Трябва още практика!";
+                emoji = "📚";
+            }
+
+            document.getElementById('resultEmoji').textContent = emoji;
+            document.getElementById('resultMessage').textContent = message;
+            document.getElementById('finalScore').textContent = `${score}/${totalPoints}`;
+            document.getElementById('finalPercentage').textContent = `${percentage}% точност`;
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            selectedAnswer = null;
+            showFeedback = false;
+
+            document.getElementById('gameScreen').classList.remove('hidden');
+            document.getElementById('resultScreen').classList.add('hidden');
+
+            displayQuestion();
+        }
+
+        // Initialize game
+        init();
+    </script>
+</body>
+</html>
